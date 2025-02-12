@@ -1,0 +1,40 @@
+{
+  "name": "carevision-alert-viewer-electron-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "pl.wamasoft.carevision-viewer",
+    "productName": "CareVision alert viewer",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "index.js",
+      "preload.js",
+      "package.json",
+      "dist/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+}
+}
