@@ -1,21 +1,58 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { networkInterfaces } = require('os');
+const fs = require('fs');
+const path = require('path');
 
 let mainWindow;
 
 function createWindow() {
+    
+    const configPath = path.join(process.cwd(), 'config.json');
+    let host = "http://localhost:4202";
+
+    if (fs.existsSync(configPath)) {
+        const configData = fs.readFileSync(configPath);
+        const config = JSON.parse(configData);
+        host = config.host;
+    }
+
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
         webPreferences: {
-            nodeIntegration: false, // Disable for security reasons
-            contextIsolation: true, // Enable context isolation
-            preload: __dirname + '/preload.js', // Ensure this path points to your preload.js
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: __dirname + '/preload.js',
         }
     });
 
-    // Replace with your actual Angular app URL
-    mainWindow.loadURL('http://172.16.61.119:4202');
+    console.log(`Connecting to ${host}`);
+
+    mainWindow.loadURL(host);
+
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        console.error(`Nie udało się załadować ${host}: ${errorDescription} (Kod błędu: ${errorCode})`);
+    
+        // Inject HTML content directly into the page
+        const errorHtml = `
+            <!DOCTYPE html>
+            <html lang="pl">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Błąd połączenia</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 20%;">
+                <h2>Nie udało się połączyć z serwerem</h2>
+                <p>Nie udało się załadować: ${host}</p>
+                <p>Błąd: ${errorDescription} (Kod: ${errorCode})</p>
+            </body>
+            </html>
+        `;
+    
+        mainWindow.webContents.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(errorHtml));
+    });
+    
 
     mainWindow.on('closed', () => {
         mainWindow = null;

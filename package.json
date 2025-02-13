@@ -36,5 +36,6 @@
     "linux": {
       "target": "AppImage"
     }
-}
+    
+  }
 }
